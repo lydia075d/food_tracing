@@ -1,0 +1,489 @@
+{
+    "abi": [
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "action",
+                    "type": "string"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "location",
+                    "type": "string"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "actor",
+                    "type": "address"
+                }
+            ],
+            "name": "ProductMoved",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                }
+            ],
+            "name": "ProductRegistered",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": false,
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "seller",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint256",
+                    "name": "quantity",
+                    "type": "uint256"
+                }
+            ],
+            "name": "ProductSplit",
+            "type": "event"
+        },
+        {
+            "inputs": [],
+            "name": "batchCounter",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "location",
+                    "type": "string"
+                }
+            ],
+            "name": "distributorReceive",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                }
+            ],
+            "name": "getMovementHistory",
+            "outputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "string",
+                            "name": "action",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "location",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "actor",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "timestamp",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "note",
+                            "type": "string"
+                        }
+                    ],
+                    "internalType": "struct FoodTraceability.Movement[]",
+                    "name": "",
+                    "type": "tuple[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                }
+            ],
+            "name": "getSellerInfo",
+            "outputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "address",
+                            "name": "sellerAddress",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "sellerName",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "quantity",
+                            "type": "uint256"
+                        }
+                    ],
+                    "internalType": "struct FoodTraceability.SellerInfo[]",
+                    "name": "",
+                    "type": "tuple[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "listAllProducts",
+            "outputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "string",
+                            "name": "farmName",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "location",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "itemName",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "quantity",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "productionDate",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "expiryDate",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "batchNumber",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "owner",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "enum FoodTraceability.ProductStatus",
+                            "name": "status",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "exists",
+                            "type": "bool"
+                        }
+                    ],
+                    "internalType": "struct FoodTraceability.Product[]",
+                    "name": "",
+                    "type": "tuple[]"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "location",
+                    "type": "string"
+                }
+            ],
+            "name": "logBorderCrossing",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "name": "productMovements",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "action",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "location",
+                    "type": "string"
+                },
+                {
+                    "internalType": "address",
+                    "name": "actor",
+                    "type": "address"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "timestamp",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "note",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "name": "productSellers",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "sellerAddress",
+                    "type": "address"
+                },
+                {
+                    "internalType": "string",
+                    "name": "sellerName",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "quantity",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "name": "products",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "farmName",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "location",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "itemName",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "quantity",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "productionDate",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "expiryDate",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                },
+                {
+                    "internalType": "address",
+                    "name": "owner",
+                    "type": "address"
+                },
+                {
+                    "internalType": "enum FoodTraceability.ProductStatus",
+                    "name": "status",
+                    "type": "uint8"
+                },
+                {
+                    "internalType": "bool",
+                    "name": "exists",
+                    "type": "bool"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "farmName",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "location",
+                    "type": "string"
+                },
+                {
+                    "internalType": "string",
+                    "name": "itemName",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "quantity",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "productionDate",
+                    "type": "uint256"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "expiryDate",
+                    "type": "uint256"
+                }
+            ],
+            "name": "registerProduct",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "batchNumber",
+                    "type": "string"
+                },
+                {
+                    "internalType": "address",
+                    "name": "seller",
+                    "type": "address"
+                },
+                {
+                    "internalType": "string",
+                    "name": "sellerName",
+                    "type": "string"
+                },
+                {
+                    "internalType": "uint256",
+                    "name": "quantity",
+                    "type": "uint256"
+                }
+            ],
+            "name": "splitAndAssignToSeller",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ]
+}
