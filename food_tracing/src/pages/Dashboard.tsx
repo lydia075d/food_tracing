@@ -1,18 +1,78 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, Key } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { dummyProducts, dummyBorderCrossings } from '../data/dummyData';
 import 'leaflet/dist/leaflet.css';
+import { ethers } from 'ethers';
+import FoodTraceabilityABI from '../abis/FoodTraceability.json';
+
+const CONTRACT_ADDRESS = "0xa54743be4d7c92E29F9975A4687c9b2f3A2e5A08";
+const CONTRACT_ABI = FoodTraceabilityABI.abi ;
+
+interface Product {
+  exists: string;
+  farmName: string;
+  id: Key | null | undefined;
+  quantity: number;
+  location: any;
+  itemName: string;
+  batchNumber: string;
+  status: number;
+  producerName: string;
+}
 
 function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [contract, setContract] = useState<ethers.Contract | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(localStorage.getItem("userRole"));
+  const [web3, setWeb3] = useState<ethers.BrowserProvider | null>(null);
+  const [account, setAccount] = useState<string>("");
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const filteredProducts = dummyProducts.filter(product => {
+  const filteredProducts = products.filter((product) => {
     const matchesSearch = product.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.batchNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || product.status === filterType;
+    const matchesFilter = filterType === 'all' || product.status.toString() === filterType;
     return matchesSearch && matchesFilter;
   });
+
+  useEffect(() => {
+      const initialize = async () => {
+        if (userRole && window.ethereum) {
+          try {
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+            
+            setWeb3(provider);
+            setContract(contract);
+            setAccount(await signer.getAddress());
+          } catch (error) {
+            console.error("Initialization error:", error);
+            alert("Error connecting to blockchain");
+          }
+        }
+      };
+      initialize();
+    }, [userRole]);
+  const fetchProducts = async () => {
+    if (!contract) return;
+    
+    try {
+      const result = await contract.listAllProducts();
+      setProducts(result);
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("Failed to fetch products");
+    }
+    console.log(products);
+  };
+
+  useEffect(() => {
+    if (contract) {
+      fetchProducts();
+    }
+  }, [contract]);
 
   return (
     <div className="space-y-6">
@@ -43,11 +103,11 @@ function Dashboard() {
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4">Live Map View</h2>
         <div className="h-[400px] rounded-lg overflow-hidden">
-          <MapContainer
-            center={[51.505, -0.09]}
-            zoom={13}
+            <MapContainer
+            center={[11.1271, 78.6569]} // Tamil Nadu coordinates
+            zoom={7} // Adjusted zoom level to show Tamil Nadu state
             style={{ height: '100%', width: '100%' }}
-          >
+            >
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
@@ -107,7 +167,7 @@ function Dashboard() {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Location
+                  Batch Number
                 </th>
               </tr>
             </thead>
@@ -123,21 +183,21 @@ function Dashboard() {
                     {product.itemName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.producerName}
+                    {product.farmName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.quantity} {product.unit}
+                    {product.quantity.toString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                      ${product.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                        product.status === 'in_transit' ? 'bg-yellow-100 text-yellow-800' :
+                      ${product.status === 2 ? 'bg-green-100 text-green-800' :
+                        product.status === 1 ? 'bg-yellow-100 text-yellow-800' :
                         'bg-gray-100 text-gray-800'}`}>
-                      {product.status}
+                      {product.exists.toString()}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {product.location.address}
+                    {product.batchNumber}
                   </td>
                 </tr>
               ))}
@@ -150,30 +210,37 @@ function Dashboard() {
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4">Alerts & Notifications</h2>
         <div className="space-y-4">
-          {dummyProducts
-            .filter(product => new Date(product.expiryDate) < new Date())
-            .map(product => (
-              <div key={product.id} className="bg-red-50 border-l-4 border-red-400 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
-                      Expired Product Alert
-                    </h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      <p>
-                        Batch {product.batchNumber} ({product.itemName}) has expired on{' '}
-                        {new Date(product.expiryDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+        {filteredProducts
+          .filter(product => product.quantity > 2000)
+          .map((product) => (
+          <tr key={product.id}>
+            <td className="px-6 py-4 whitespace-nowrap">
+              <div className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer">
+                {product.batchNumber}
               </div>
-            ))}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {product.itemName}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {product.farmName}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {product.quantity.toString()}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap">
+              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                ${product.status === 2 ? 'bg-green-100 text-green-800' :
+            product.status === 1 ? 'bg-yellow-100 text-yellow-800' :
+            'bg-gray-100 text-gray-800'}`}>
+                {product.exists.toString()}
+              </span>
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {product.batchNumber}
+            </td>
+          </tr>
+              ))}
         </div>
       </div>
     </div>

@@ -15,6 +15,7 @@ interface Product {
 }
 
 interface Movement {
+  sellerName: string;
   action: string;
   actor: string;
   location: string;
@@ -426,6 +427,9 @@ export default function Product() {
                     {`${movement.actor} @ ${movement.location}`}
                     <span className="text-gray-500 text-sm block">
                       {new Date(Number(movement.timestamp) * 1000).toLocaleString()}
+                    </span>                    
+                    <span className="text-gray-500 text-sm block">
+                      {JSON.stringify(movement)}
                     </span>
                   </li>
                 ))}
