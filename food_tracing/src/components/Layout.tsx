@@ -34,6 +34,15 @@ function Layout() {
             Producer Registration
           </Link>
           <Link
+            to="/product-registration"
+            className={`flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 ${
+              isActive('/product-registration') ? 'bg-gray-100' : ''
+            }`}
+          >
+            <Box className="w-5 h-5 mr-3" />
+            Product Registration
+          </Link>
+          <Link
             to="/border-crossing"
             className={`flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 ${
               isActive('/border-crossing') ? 'bg-gray-100' : ''

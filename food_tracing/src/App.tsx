@@ -5,6 +5,7 @@ import BorderCrossing from './pages/BorderCrossing';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Layout from './components/Layout';
+import ProductRegistration from './pages/ProductRegistration';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="producer-registration" element={<ProducerRegistration />} />
+          <Route path="product-registration" element={<ProductRegistration />} />
           <Route path="border-crossing" element={<BorderCrossing />} />
           <Route path="dashboard" element={<Dashboard />} />
         </Route>
