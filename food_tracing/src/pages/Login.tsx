@@ -1,79 +1,233 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { dummyUsers } from '../data/dummyData';
+import React, { useState } from "react";
+import { ethers } from "ethers";
+import { useNavigate } from "react-router-dom";
+
+const CONTRACT_ADDRESS = "0x147D7E2ED524DC651083AAE516F4a14Bc73A9619"; // Replace with deployed contract address
+const CONTRACT_ABI = [
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "number",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "role",
+        "type": "string"
+      }
+    ],
+    "name": "UserRegistered",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_number",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_password",
+        "type": "string"
+      }
+    ],
+    "name": "loginUser",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_password",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_number",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_role",
+        "type": "string"
+      }
+    ],
+    "name": "registerUser",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    name: "",
+    password: "",
+    number: "",
+    role: "Producer"
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("MetaMask not detected");
+      return;
+    }
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = dummyUsers.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-      // In a real app, you would set proper authentication here
-      navigate('/dashboard');
-    } else {
-      setError('Invalid credentials');
+    setLoading(true);
+
+    try {
+      if (!window.ethereum) {
+        alert("MetaMask not detected");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      const userExists = await contract.loginUser(formData.number, formData.password);
+      
+      if (userExists[0]) {
+        setMessage("Login successful!");
+        localStorage.setItem("userRole", userExists[1]);
+        navigate("/product-registration");
+      } else {
+        setMessage("Invalid credentials.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setMessage("Login failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (!window.ethereum) {
+        alert("MetaMask not detected");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      await contract.registerUser(formData.name, formData.password, parseInt(formData.number), formData.role);
+
+      setMessage("Registration successful! Now you can log in.");
+    } catch (error) {
+      console.error("Registration error:", error);
+      setMessage("Registration failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
-        
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+      <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
+        <h2 className="text-2xl font-bold mb-4">Login / Register</h2>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="w-full border rounded p-2"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full border rounded p-2"
+          />
+          <input
+            type="number"
+            name="number"
+            placeholder="Phone Number"
+            value={formData.number}
+            onChange={handleChange}
+            required
+            className="w-full border rounded p-2"
+          />
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="w-full border rounded p-2"
           >
-            Login
+            <option>Producer</option>
+            <option>Intermediate</option>
+            <option>Gov Authority</option>
+            <option>Distributor</option>
+          </select>
+
+          <button type="submit" className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+            {loading ? "Logging in..." : "Login"}
+          </button>
+
+          <button type="button" onClick={handleRegister} className="w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+            {loading ? "Registering..." : "Register"}
+          </button>
+
+          <button type="button" onClick={connectWallet} className="w-full bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
+            Connect Wallet
           </button>
         </form>
 
-        <div className="mt-4 text-sm text-gray-600">
-          <p>Demo Accounts:</p>
-          <ul className="list-disc list-inside">
-            <li>Producer: farmer@example.com / password123</li>
-            <li>Border Official: border@example.com / password123</li>
-            <li>Admin: admin@example.com / password123</li>
-          </ul>
-        </div>
+        {message && <p className="text-red-500 mt-4">{message}</p>}
       </div>
     </div>
   );
