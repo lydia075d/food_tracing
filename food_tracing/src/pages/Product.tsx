@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import FoodTraceabilityABI from '../abis/FoodTraceability.json';
 import clsx from "clsx";
 
-const CONTRACT_ADDRESS = "0xCBFA64B9551970350cd385EAC3765eD983B2056A";
+const CONTRACT_ADDRESS = "0xa54743be4d7c92E29F9975A4687c9b2f3A2e5A08";
 const CONTRACT_ABI = FoodTraceabilityABI.abi ;
 
 interface Product {
@@ -295,12 +295,37 @@ export default function Product() {
           >
             <form onSubmit={registerProduct} className="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
               <h2 className="text-xl font-semibold mb-4">🧺 Register Product</h2>
-              <input name="farmName" placeholder="Farm Name" required className="input mb-3" />
-              <input name="location" placeholder="Location" required className="input mb-3" />
-              <input name="itemName" placeholder="Item Name" required className="input mb-3" />
-              <input name="quantity" type="number" placeholder="Quantity" required className="input mb-3" />
-              <input name="productionDate" type="date" required className="input mb-3" />
-              <input name="expiryDate" type="date" required className="input mb-3" />
+                <div className="space-y-4">
+                <div className="flex flex-col">
+                  <label htmlFor="farmName" className="text-sm font-medium text-gray-700 mb-1">Farm Name</label>
+                  <input id="farmName" name="farmName" placeholder="Enter farm name" required className="input mb-3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                
+                <div className="flex flex-col">
+                  <label htmlFor="location" className="text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <input id="location" name="location" placeholder="Enter location" required className="input mb-3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                
+                <div className="flex flex-col">
+                  <label htmlFor="itemName" className="text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                  <input id="itemName" name="itemName" placeholder="Enter item name" required className="input mb-3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                
+                <div className="flex flex-col">
+                  <label htmlFor="quantity" className="text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                  <input id="quantity" name="quantity" type="number" placeholder="Enter quantity" required className="input mb-3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                
+                <div className="flex flex-col">
+                  <label htmlFor="productionDate" className="text-sm font-medium text-gray-700 mb-1">Production Date</label>
+                  <input id="productionDate" name="productionDate" type="date" required className="input mb-3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                
+                <div className="flex flex-col">
+                  <label htmlFor="expiryDate" className="text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                  <input id="expiryDate" name="expiryDate" type="date" required className="input mb-3 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                </div>
               <button 
                 type="submit" 
                 disabled={loading}
