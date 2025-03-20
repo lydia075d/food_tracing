@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import ProductRegistration from "./pages/ProductRegistration";
-import ProducerRegistration from "./pages/ProducerRegistration";
-import BorderCrossing from "./pages/BorderCrossing";
+import ProductRegistration from "./pages/Product";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
+import Product from "./pages/Product";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -37,23 +36,7 @@ function App() {
             path="product-registration"
             element={
               <ProtectedRoute>
-                <ProductRegistration />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="producer-registration"
-            element={
-              <ProtectedRoute>
-                <ProducerRegistration />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="border-crossing"
-            element={
-              <ProtectedRoute>
-                <BorderCrossing />
+                <Product />
               </ProtectedRoute>
             }
           />
