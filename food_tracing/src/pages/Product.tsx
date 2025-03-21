@@ -6,7 +6,7 @@ import FoodTraceabilityABI from '../abis/FoodTraceability.json';
 import clsx from "clsx";
 
 const CONTRACT_ADDRESS = "0xa54743be4d7c92E29F9975A4687c9b2f3A2e5A08";
-const CONTRACT_ABI = FoodTraceabilityABI.abi ;
+const CONTRACT_ABI = FoodTraceabilityABI.abi;
 
 interface Product {
   itemName: string;
@@ -15,7 +15,6 @@ interface Product {
 }
 
 interface Movement {
-  sellerName: string;
   action: string;
   actor: string;
   location: string;
@@ -79,7 +78,6 @@ export default function Product() {
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
       
-      // Simulate login - replace with your contract logic
       const tx = await contract.registerUser(
         loginData.name,
         loginData.password,
@@ -92,11 +90,12 @@ export default function Product() {
       setUserRole(loginData.role);
     } catch (error) {
       console.error("Login error:", error);
-      alert("Login failed");
+      alert("Login failed: " + (error instanceof Error ? error.message : "Unknown error"));
     } finally {
       setLoading(false);
     }
   };
+
 
   const registerProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,15 +191,34 @@ export default function Product() {
   const fetchHistory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!contract) return;
-    
+  
+    setLoading(true);
+  
     try {
       const result = await contract.getMovementHistory(batchNumberHistory);
-      setMovementHistory(result);
+      console.log("Raw history data:", result);
+      
+      if (result[0].length === 0) {
+        alert("No history found for this batch number");
+        return;
+      }
+
+      const formattedHistory = result[0].map((action: string, index: number) => ({
+        action,
+        actor: result[1][index],
+        location: result[2][index],
+        timestamp: Number(result[3][index].toString()) * 1000 // Convert to milliseconds
+      })) as Movement[];
+  
+      setMovementHistory(formattedHistory);
     } catch (error) {
-      console.error("History error:", error);
-      alert("Failed to fetch history");
+      console.error("History fetch error:", error);
+      alert(`Failed to fetch history: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   if (!userRole) {
     return (
@@ -376,6 +394,12 @@ export default function Product() {
               <div className="bg-white p-6 rounded-xl shadow">
                 <h3 className="text-lg font-semibold mb-4">📦 Distribution</h3>
                 <form onSubmit={splitAndAssign} className="space-y-3">
+                <input
+                  value={batchNumber}
+                  onChange={(e) => setBatchNumber(e.target.value)}
+                  placeholder="Batch Number"
+                  className="input mb-3"
+                />
                   <input name="sellerAddress" placeholder="Seller Address" required className="input" />
                   <input name="sellerName" placeholder="Seller Name" required className="input" />
                   <input name="quantity" type="number" placeholder="Quantity" required className="input" />
@@ -394,49 +418,57 @@ export default function Product() {
 
         {/* History Tab */}
         {tab === "history" && (
-          <motion.div
-            key="history"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="bg-white p-6 rounded-xl shadow"
-          >
-            <h2 className="text-xl font-semibold mb-4">📜 Product History</h2>
-            <form onSubmit={fetchHistory} className="mb-4">
-              <input
-                value={batchNumberHistory}
-                onChange={(e) => setBatchNumberHistory(e.target.value)}
-                placeholder="Batch Number"
-                className="input mr-3"
-              />
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="btn-primary bg-orange-600 text-white py-2 px-4 rounded hover:bg-orange-700 disabled:bg-gray-400"
-              >
-                {loading ? "Fetching..." : "Get History"}
-              </button>
-            </form>
-            
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Movement History</h3>
-              <ul className="list-disc pl-6">
-                {movementHistory.map((movement, index) => (
+    <motion.div
+      key="history"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="bg-white p-6 rounded-xl shadow"
+    >
+      <h2 className="text-xl font-semibold mb-4">📜 Product History</h2>
+      <form onSubmit={fetchHistory} className="mb-4 flex gap-3">
+        <input
+          value={batchNumberHistory}
+          onChange={(e) => setBatchNumberHistory(e.target.value)}
+          placeholder="Enter Batch Number"
+          className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          required
+        />
+        <button 
+          type="submit" 
+          disabled={loading}
+          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors"
+        >
+          {loading ? "Fetching..." : "Get History"}
+        </button>
+      </form>
+      
+      {movementHistory.length > 0 ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-4 font-semibold border-b pb-2">
+            <div>Action</div>
+            <div>Actor</div>
+            <div>Location</div>
+            <div>Timestamp</div>
+          </div>
+           {movementHistory.map((movement, index) => (
                   <li key={index} className="py-2">
-                    <span className="font-medium">{movement.action}</span> -{" "}
-                    {`${movement.actor} @ ${movement.location}`}
+                    <span className="font-medium">{movement.action.toString().slice(0,17)}</span> -{" "}
+                    {` @ ${movement.location}`}
                     <span className="text-gray-500 text-sm block">
                       {new Date(Number(movement.timestamp) * 1000).toLocaleString()}
                     </span>                    
-                    <span className="text-gray-500 text-sm block">
-                      {JSON.stringify(movement)}
-                    </span>
                   </li>
                 ))}
-              </ul>
-            </div>
-          </motion.div>
-        )}
+        </div>
+      ) : (
+        <div className="text-gray-500 text-center py-4">
+          No history found for this batch number
+        </div>
+      )}
+    </motion.div>
+  )}
+
       </AnimatePresence>
 
       {loading && (
